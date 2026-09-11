@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contas em Dia | Portal do Cliente</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="demo-banner">🔧 <strong>Mockup de demonstração</strong> — dados fictícios, apenas para apresentação ao cliente.</div>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <img src="assets/img/logo.png" alt="Contas em Dia" class="login-logo">
+    <h1>Portal do Cliente</h1>
+    <p class="subtitle">Aceda à sua área de contabilidade com o NIF da sua empresa</p>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <form id="login-form">
+      <div class="field">
+        <label for="nif">NIF da Empresa</label>
+        <input type="text" id="nif" name="nif" inputmode="numeric" placeholder="000000000" maxlength="9" autocomplete="off" required>
+      </div>
+      <button type="submit" class="btn-primary">Entrar</button>
+    </form>
+
+    <div class="demo-hint">
+      Para ver a demonstração, utilize a empresa fictícia <strong>Empresa DEMO</strong><br>
+      NIF: <strong>100100100</strong>
+      <br>
+      <button type="button" id="fill-demo">Preencher automaticamente</button>
+    </div>
+
+    <div class="login-footer">Contas em Dia — Contabilidade, Auditoria e Consultoria Fiscal<br>Praia, Santiago, Cabo Verde</div>
+  </div>
+</div>
+
+<script src="assets/js/auth.js"></script>
+</body>
+</html>

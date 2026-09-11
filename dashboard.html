@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard | Contas em Dia</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="demo-banner">🔧 <strong>Mockup de demonstração</strong> — dados fictícios, apenas para apresentação ao cliente.</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <img src="assets/img/logo.png" alt="Contas em Dia" class="topbar-logo">
+    <div class="topbar-divider"></div>
+    <div>
+      <div class="company-name" id="company-name">—</div>
+      <div class="company-nif" id="company-nif">—</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="currency-toggle">
+      <button id="btn-cve" class="active">CVE</button>
+      <button id="btn-eur">EUR</button>
+    </div>
+    <button class="btn-logout" id="btn-logout">Sair</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-head">
+    <div>
+      <h1>Visão Geral</h1>
+      <div class="muted">Resumo financeiro e obrigações fiscais da empresa</div>
+    </div>
+    <div class="period-pill" id="period-label">—</div>
+  </div>
+
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Faturação do mês</span>
+        <div class="kpi-icon" style="background:#eaf1fb;color:#2f6399;">💰</div>
+      </div>
+      <div class="kpi-value" id="kpi-faturacao">—</div>
+      <div class="kpi-delta" id="kpi-faturacao-delta">—</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Despesas do mês</span>
+        <div class="kpi-icon" style="background:#fdf3e3;color:#c9a15a;">📉</div>
+      </div>
+      <div class="kpi-value" id="kpi-despesas">—</div>
+      <div class="kpi-delta" id="kpi-despesas-delta">—</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Resultado líquido</span>
+        <div class="kpi-icon" style="background:#e5f6ee;color:#1f9d6e;">📈</div>
+      </div>
+      <div class="kpi-value" id="kpi-resultado">—</div>
+      <div class="kpi-delta" id="kpi-resultado-delta">—</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">IVA a pagar</span>
+        <div class="kpi-icon" style="background:#fdecec;color:#d1495b;">🧾</div>
+      </div>
+      <div class="kpi-value" id="kpi-iva">—</div>
+      <div class="kpi-delta neutral" id="kpi-iva-delta">—</div>
+    </div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Faturação vs. Despesas (2026)</h2>
+        <div class="legend">
+          <span><span class="legend-dot" style="background:#2f6399;"></span>Faturação</span>
+          <span><span class="legend-dot" style="background:#c9a15a;"></span>Despesas</span>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="revenue-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Obrigações Fiscais</h2>
+      </div>
+      <ul class="tax-list" id="tax-list"></ul>
+    </div>
+  </section>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <h2>Documentos Recentes</h2>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Nº Documento</th>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th class="center">Tipo</th>
+            <th style="text-align:right;">Valor</th>
+            <th class="center">Estado</th>
+          </tr>
+        </thead>
+        <tbody id="doc-table-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="bottom-grid">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Resumo do Balanço</h2>
+      </div>
+      <ul class="tax-list">
+        <li class="tax-item"><span class="name">Caixa e Bancos</span><span id="bal-caixa">—</span></li>
+        <li class="tax-item"><span class="name">Clientes (a receber)</span><span id="bal-clientes">—</span></li>
+        <li class="tax-item"><span class="name">Fornecedores (a pagar)</span><span id="bal-fornecedores">—</span></li>
+        <li class="tax-item"><span class="name">Capital Próprio</span><span id="bal-capital">—</span></li>
+      </ul>
+    </div>
+
+    <div class="panel contact-panel">
+      <div class="avatar">DF</div>
+      <div class="info">
+        <h3 id="gestor-nome">—</h3>
+        <p>Responsável Escritório · Contas em Dia</p>
+        <p>📞 +238 262 3539 &nbsp; ✉️ <a href="mailto:geral@contasemdia.cv">geral@contasemdia.cv</a></p>
+        <p>Condomínio Dó, Palmarejo Grande — Praia, Santiago</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  Mockup desenvolvido para apresentação — Contas em Dia, Contabilidade, Auditoria e Consultoria Fiscal, Cabo Verde.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>
