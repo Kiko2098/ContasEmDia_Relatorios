@@ -65,3 +65,16 @@ function initLogout() {
     window.location.href = "index.html";
   });
 }
+
+// Só mostra a dica "deslize para o lado" quando a tabela realmente não cabe no ecrã.
+function updateScrollHints() {
+  document.querySelectorAll(".table-scroll").forEach((el) => {
+    const hint = el.nextElementSibling;
+    if (hint && hint.classList.contains("scroll-hint")) {
+      hint.style.display = el.scrollWidth > el.clientWidth + 2 ? "" : "none";
+    }
+  });
+}
+
+window.addEventListener("load", updateScrollHints);
+window.addEventListener("resize", updateScrollHints);
