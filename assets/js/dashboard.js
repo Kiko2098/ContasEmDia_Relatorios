@@ -1,73 +1,58 @@
-// Lógica do dashboard: sessão simulada, formatação de moeda e gráficos.
+// Lógica da página "Visão Geral": KPIs, gráficos e resumo de balanço.
 
-let currentCurrency = "CVE";
 let revenueChart = null;
-
-function guardSession() {
-  const nif = sessionStorage.getItem("contasemdia_nif");
-  if (nif !== "100100100") {
-    window.location.href = "index.html";
-    return false;
-  }
-  return true;
-}
-
-function toDisplayValue(cveValue) {
-  if (currentCurrency === "EUR") {
-    return cveValue / EUR_RATE;
-  }
-  return cveValue;
-}
-
-function formatCurrency(cveValue, { showSign = false } = {}) {
-  const value = toDisplayValue(cveValue);
-  const sign = value < 0 ? "-" : (showSign && value > 0 ? "+" : "");
-  const abs = Math.abs(value);
-
-  let formatted;
-  if (currentCurrency === "EUR") {
-    formatted = abs.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `${sign}${formatted} €`;
-  }
-  formatted = Math.round(abs).toLocaleString("pt-PT");
-  return `${sign}${formatted} CVE`;
-}
-
-function renderHeader() {
-  document.getElementById("company-name").textContent = COMPANY.nome;
-  document.getElementById("company-nif").textContent = `NIF ${COMPANY.nif} · ${COMPANY.regime}`;
-}
+const expenseCharts = {};
 
 function renderKPIs() {
-  document.getElementById("kpi-faturacao").textContent = formatCurrency(KPI.faturacaoMes);
-  document.getElementById("kpi-despesas").textContent = formatCurrency(KPI.despesasMes);
-  document.getElementById("kpi-resultado").textContent = formatCurrency(KPI.resultadoLiquido);
-  document.getElementById("kpi-iva").textContent = formatCurrency(KPI.ivaAPagar);
+  document.getElementById("kpi-faturacao").textContent = formatCurrency(ACUMULADO.faturacao);
+  document.getElementById("kpi-despesas").textContent = formatCurrency(ACUMULADO.despesas);
 
-  const fatDelta = document.getElementById("kpi-faturacao-delta");
-  fatDelta.textContent = `${KPI.faturacaoDeltaPct > 0 ? "▲" : "▼"} ${Math.abs(KPI.faturacaoDeltaPct)}% vs. mês anterior`;
-  fatDelta.className = `kpi-delta ${KPI.faturacaoDeltaPct >= 0 ? "up" : "down"}`;
+  const resultadoEl = document.getElementById("kpi-resultado");
+  resultadoEl.textContent = formatCurrency(ACUMULADO.resultado);
+  resultadoEl.classList.toggle("negative", ACUMULADO.resultado < 0);
 
-  const despDelta = document.getElementById("kpi-despesas-delta");
-  despDelta.textContent = `${KPI.despesasDeltaPct > 0 ? "▲" : "▼"} ${Math.abs(KPI.despesasDeltaPct)}% vs. mês anterior`;
-  despDelta.className = `kpi-delta ${KPI.despesasDeltaPct <= 0 ? "up" : "down"}`;
+  const setDelta = (id, valor, valorAnterior, invert = false) => {
+    const pct = ((valor - valorAnterior) / valorAnterior) * 100;
+    const up = invert ? pct <= 0 : pct >= 0;
+    const el = document.getElementById(id);
+    el.textContent = `${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1)}% vs. ${ANO_ANTERIOR.ano}`;
+    el.className = `kpi-delta ${up ? "up" : "down"}`;
+  };
+  setDelta("kpi-faturacao-delta", ACUMULADO.faturacao, ANO_ANTERIOR.faturacao);
+  setDelta("kpi-despesas-delta", ACUMULADO.despesas, ANO_ANTERIOR.despesas, true);
+  setDelta("kpi-resultado-delta", ACUMULADO.resultado, ANO_ANTERIOR.resultado);
+}
 
-  const resDelta = document.getElementById("kpi-resultado-delta");
-  resDelta.textContent = `${KPI.resultadoDeltaPct > 0 ? "▲" : "▼"} ${Math.abs(KPI.resultadoDeltaPct)}% vs. mês anterior`;
-  resDelta.className = `kpi-delta ${KPI.resultadoDeltaPct >= 0 ? "up" : "down"}`;
+const EXPENSE_CATEGORIES = [
+  { key: "pessoal", short: "Pessoal", label: "Gastos com Pessoal", color: "#2f6399" },
+  { key: "cmvmc", short: "CMVMC", label: "Custo das Mercadorias Vendidas e Matérias Consumidas", color: "#c9a15a" },
+  { key: "fse", short: "FSE", label: "Fornecimentos e Serviços Externos", color: "#6c8fb0" },
+  { key: "outras", short: "Outras", label: "Outras Despesas", color: "#b7c4d3" },
+];
 
-  document.getElementById("kpi-iva-delta").textContent = `Vencimento: ${KPI.ivaVencimento}`;
+function renderRevenueLegend() {
+  const legend = document.getElementById("revenue-legend");
+  const items = [
+    { short: "Receitas", label: "Receitas", color: FATURACAO_COLOR },
+    ...EXPENSE_CATEGORIES,
+  ];
+  legend.innerHTML = items
+    .map((it) => `<span title="${it.label}"><span class="legend-dot" style="background:${it.color};"></span>${it.short}</span>`)
+    .join("");
 }
 
 function renderChart() {
   const ctx = document.getElementById("revenue-chart").getContext("2d");
-  const labels = MONTHLY.map((m) => m.mes);
-  const faturacao = MONTHLY.map((m) => toDisplayValue(m.faturacao));
-  const despesas = MONTHLY.map((m) => toDisplayValue(m.despesas));
+  const labels = [ANO_ANTERIOR.ano, "2026"];
+  const faturacao = [toDisplayValue(ANO_ANTERIOR.faturacao), toDisplayValue(ACUMULADO.faturacao)];
+  const expenseSeries = EXPENSE_CATEGORIES.map((c) => [
+    toDisplayValue(ANO_ANTERIOR[c.key]),
+    toDisplayValue(ACUMULADO[c.key]),
+  ]);
 
   if (revenueChart) {
     revenueChart.data.datasets[0].data = faturacao;
-    revenueChart.data.datasets[1].data = despesas;
+    expenseSeries.forEach((data, i) => { revenueChart.data.datasets[i + 1].data = data; });
     revenueChart.update();
     return;
   }
@@ -78,19 +63,21 @@ function renderChart() {
       labels,
       datasets: [
         {
-          label: "Faturação",
+          label: "Receitas",
           data: faturacao,
-          backgroundColor: "#2f6399",
+          backgroundColor: FATURACAO_COLOR,
+          stack: "faturacao",
           borderRadius: 5,
-          maxBarThickness: 26,
+          maxBarThickness: 60,
         },
-        {
-          label: "Despesas",
-          data: despesas,
-          backgroundColor: "#c9a15a",
-          borderRadius: 5,
-          maxBarThickness: 26,
-        },
+        ...EXPENSE_CATEGORIES.map((c, i) => ({
+          label: c.short,
+          data: expenseSeries[i],
+          backgroundColor: c.color,
+          stack: "despesas",
+          borderRadius: i === EXPENSE_CATEGORIES.length - 1 ? 5 : 0,
+          maxBarThickness: 60,
+        })),
       ],
     },
     options: {
@@ -98,8 +85,9 @@ function renderChart() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false } },
+        x: { stacked: true, grid: { display: false } },
         y: {
+          stacked: true,
           grid: { color: "#eef1f6" },
           ticks: {
             callback: (v) => currentCurrency === "EUR"
@@ -112,90 +100,68 @@ function renderChart() {
   });
 }
 
-function renderObligations() {
-  const list = document.getElementById("tax-list");
-  list.innerHTML = "";
-  OBRIGACOES.forEach((o) => {
+function renderExpenseDonut(year, dados) {
+  const values = EXPENSE_CATEGORIES.map((c) => toDisplayValue(dados[c.key]));
+
+  const ctx = document.getElementById(`expense-chart-${year}`).getContext("2d");
+  if (expenseCharts[year]) {
+    expenseCharts[year].data.datasets[0].data = values;
+    expenseCharts[year].update();
+  } else {
+    expenseCharts[year] = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: EXPENSE_CATEGORIES.map((c) => c.label),
+        datasets: [{
+          data: values,
+          backgroundColor: EXPENSE_CATEGORIES.map((c) => c.color),
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "68%",
+        plugins: { legend: { display: false } },
+      },
+    });
+  }
+
+  const legend = document.getElementById(`expense-legend-${year}`);
+  legend.innerHTML = "";
+  EXPENSE_CATEGORIES.forEach((c) => {
+    const pct = ((dados[c.key] / dados.despesas) * 100).toFixed(1);
     const li = document.createElement("li");
     li.className = "tax-item";
     li.innerHTML = `
       <div>
-        <div class="name">${o.nome}</div>
-        <div class="date">${o.data}</div>
+        <div class="name" title="${c.label}"><span class="legend-dot" style="background:${c.color};"></span>${c.short}</div>
+        <div class="date">${pct}% das despesas</div>
       </div>
-      <span class="status-pill ${o.estado}">${o.estado.charAt(0).toUpperCase() + o.estado.slice(1)}</span>
+      <span>${formatCurrency(dados[c.key])}</span>
     `;
-    list.appendChild(li);
+    legend.appendChild(li);
   });
 }
 
-function renderDocuments() {
-  const tbody = document.getElementById("doc-table-body");
-  tbody.innerHTML = "";
-  DOCUMENTOS.forEach((d) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.numero}</td>
-      <td>${d.data}</td>
-      <td>${d.cliente}</td>
-      <td class="center"><span class="badge-doc">${d.tipo}</span></td>
-      <td class="amount">${formatCurrency(d.valor)}</td>
-      <td class="center"><span class="status-pill ${d.estado === "paga" ? "pago" : d.estado === "pendente" ? "pendente" : "atrasado"}">${d.estado.charAt(0).toUpperCase() + d.estado.slice(1)}</span></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderBalance() {
-  document.getElementById("bal-caixa").textContent = formatCurrency(BALANCO_RESUMO.caixaEBancos);
-  document.getElementById("bal-clientes").textContent = formatCurrency(BALANCO_RESUMO.clientes);
-  document.getElementById("bal-fornecedores").textContent = formatCurrency(BALANCO_RESUMO.fornecedores);
-  document.getElementById("bal-capital").textContent = formatCurrency(BALANCO_RESUMO.capitalProprio);
+function renderExpenseBreakdown() {
+  renderExpenseDonut("2025", ANO_ANTERIOR);
+  renderExpenseDonut("2026", ACUMULADO);
 }
 
 function renderAll() {
   renderKPIs();
   renderChart();
-  renderDocuments();
-  renderBalance();
-}
-
-function initCurrencyToggle() {
-  const btnCVE = document.getElementById("btn-cve");
-  const btnEUR = document.getElementById("btn-eur");
-
-  btnCVE.addEventListener("click", () => {
-    if (currentCurrency === "CVE") return;
-    currentCurrency = "CVE";
-    btnCVE.classList.add("active");
-    btnEUR.classList.remove("active");
-    renderAll();
-  });
-
-  btnEUR.addEventListener("click", () => {
-    if (currentCurrency === "EUR") return;
-    currentCurrency = "EUR";
-    btnEUR.classList.add("active");
-    btnCVE.classList.remove("active");
-    renderAll();
-  });
-}
-
-function initLogout() {
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    sessionStorage.removeItem("contasemdia_nif");
-    window.location.href = "index.html";
-  });
+  renderExpenseBreakdown();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!guardSession()) return;
   renderHeader();
-  renderObligations();
-  initCurrencyToggle();
+  renderRevenueLegend();
+  initCurrencyToggle(renderAll);
   initLogout();
   renderAll();
 
-  document.getElementById("period-label").textContent = "Setembro 2026";
-  document.getElementById("gestor-nome").textContent = COMPANY.gestorContabilistico;
+  document.getElementById("period-label").textContent = "Jan — Set 2026";
 });

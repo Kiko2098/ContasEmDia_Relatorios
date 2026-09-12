@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balanço | Contas em Dia</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="demo-banner"><strong>Mockup de demonstração</strong> — dados fictícios, apenas para apresentação ao cliente.</div>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <img src="assets/img/logo.png" alt="Contas em Dia" class="topbar-logo">
+    <div class="topbar-divider"></div>
+    <div>
+      <div class="company-name" id="company-name">—</div>
+      <div class="company-nif" id="company-nif">—</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="currency-toggle">
+      <button id="btn-cve" class="active">CVE</button>
+      <button id="btn-eur">EUR</button>
+    </div>
+    <button class="btn-logout" id="btn-logout">Sair</button>
+  </div>
+</header>
+
+<nav class="page-nav">
+  <a href="dashboard.html" class="nav-link">Visão Geral</a>
+  <a href="mensal.html" class="nav-link">Acompanhamento Mensal</a>
+  <a href="balanco.html" class="nav-link active">Balanço</a>
+  <a href="balancete.html" class="nav-link">Balancete</a>
+</nav>
+
+<main class="main">
+  <div class="page-head">
+    <div>
+      <h1>Balanço</h1>
+      <div class="muted">Demonstração da Posição Financeira — Ativo, Passivo e Capital Próprio</div>
+    </div>
+    <div class="period-pill" id="period-label">—</div>
+  </div>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <h2>Ativo</h2>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rubrica</th>
+            <th style="text-align:right;">30 Set 2026</th>
+            <th style="text-align:right;">30 Set 2025</th>
+          </tr>
+        </thead>
+        <tbody id="ativo-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel table-panel">
+    <div class="panel-head">
+      <h2>Passivo e Capital Próprio</h2>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rubrica</th>
+            <th style="text-align:right;">30 Set 2026</th>
+            <th style="text-align:right;">30 Set 2025</th>
+          </tr>
+        </thead>
+        <tbody id="passivo-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  Mockup desenvolvido para apresentação — Contas em Dia, Contabilidade, Auditoria e Consultoria Fiscal, Cabo Verde.
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/balanco.js"></script>
+</body>
+</html>
